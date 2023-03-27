@@ -48,7 +48,7 @@ class EmbeddingsDataModule(pl.LightningDataModule):
             tail_index=self.data.edge_index[:, self.data.train_mask][1],
             batch_size=self.batch_size,
             shuffle=True,
-            num_workers=8
+            num_workers=8,
         )
 
     def val_dataloader(self) -> KGTripletLoader:
@@ -61,7 +61,7 @@ class EmbeddingsDataModule(pl.LightningDataModule):
             tail_index=self.data.edge_index[:, self.data.val_mask][1],
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=8
+            num_workers=8,
         )
 
     def test_dataloader(self) -> KGTripletLoader:
@@ -74,5 +74,5 @@ class EmbeddingsDataModule(pl.LightningDataModule):
             tail_index=self.data.edge_index[:, self.data.test_mask][1],
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=8
+            num_workers=8,
         )

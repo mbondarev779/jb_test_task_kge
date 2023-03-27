@@ -74,7 +74,7 @@ class CustomTransE(nn.Module):
         with torch.no_grad():
             neg_head_idxs, neg_tail_idxs = self._random_sample(head_idxs, tail_idxs)
         neg_score = self(neg_head_idxs, rel_idxs, neg_tail_idxs)
-        # поменять местами возможно
+
         return F.margin_ranking_loss(
             pos_score,
             neg_score,

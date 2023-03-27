@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Tuple, Union
+
 import pytorch_lightning as pl
 import torch
 import torch.optim as optim
@@ -37,12 +38,19 @@ class TransEModule(pl.LightningModule):
         )
         return loss
 
-    def _metrics_step(self, batch: Tuple[Tensor, Tensor, Tensor]) -> Dict[str, Union[Tensor, List[int], List[bool]]]:
+    def _metrics_step(
+        self, batch: Tuple[Tensor, Tensor, Tensor]
+    ) -> Dict[str, Union[Tensor, List[int], List[bool]]]:
         head_idxs, rel_idxs, tail_idxs = batch
         loss = self.model.loss(head_idxs, rel_idxs, tail_idxs)
 
         mean_ranks, hits_at_10 = [], []
-        for h, r, t in tqdm(zip(head_idxs, rel_idxs, tail_idxs), total=len(head_idxs), desc="Iterating through batch", leave=False):
+        for h, r, t in tqdm(
+            zip(head_idxs, rel_idxs, tail_idxs),
+            total=len(head_idxs),
+            desc="Iterating through batch",
+            leave=False,
+        ):
             scores = []
             tail_indices = torch.arange(self.model.num_ents, device=t.device)
             for ts in tail_indices.split(head_idxs.numel()):
@@ -59,15 +67,25 @@ class TransEModule(pl.LightningModule):
         return {"loss": loss, "mean_ranks": mean_ranks, "hits_at_10": hits_at_10}
 
     def _metrics_epoch_end(self, outputs: List[Dict[str, Tensor]]) -> None:
-        mean_ranks = [mean_rank for output in outputs for mean_rank in output["mean_ranks"]]
-        hits_at_10 = [hit_at_10 for output in outputs for hit_at_10 in output["hits_at_10"]]
-        mean_reciprocal_rank = sum(1.0 / (mean_rank + 1) for mean_rank in mean_ranks) / len(mean_ranks)
+        mean_ranks = [
+            mean_rank for output in outputs for mean_rank in output["mean_ranks"]
+        ]
+        hits_at_10 = [
+            hit_at_10 for output in outputs for hit_at_10 in output["hits_at_10"]
+        ]
+        mean_reciprocal_rank = sum(
+            1.0 / (mean_rank + 1) for mean_rank in mean_ranks
+        ) / len(mean_ranks)
 
         mean_rank_metric = float(torch.tensor(mean_ranks, dtype=torch.float).mean())
         hits_at_10_metric = sum(hits_at_10) / len(hits_at_10)
 
         self.log_dict(
-            {"MR": mean_rank_metric, "MRR": mean_reciprocal_rank, "Hits@10": hits_at_10_metric}
+            {
+                "MR": mean_rank_metric,
+                "MRR": mean_reciprocal_rank,
+                "Hits@10": hits_at_10_metric,
+            }
         )
 
     def validation_step(self, batch: Tuple[Tensor, Tensor, Tensor], batch_idx: Any):
