@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "jb_test_task_kge"}]
 
 [tool.poetry.dependencies]
-python = "3.8.16"
+python = "3.9.16"
 torch = "2.0.0"
 torch-geometric = "2.3.0"
 pytorch-lightning = "1.9.0"
